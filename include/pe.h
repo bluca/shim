@@ -44,6 +44,12 @@ handle_image (void *data, unsigned int datasize,
 	      UINTN *alloc_pages);
 
 EFI_STATUS
+validate_cached_section(EFI_HANDLE parent_image_handle,
+			void *addr, UINTN size);
+void
+flush_cached_sections(EFI_HANDLE parent_image_handle);
+
+EFI_STATUS
 generate_hash (char *data, unsigned int datasize,
 	       PE_COFF_LOADER_IMAGE_CONTEXT *context,
 	       UINT8 *sha256hash, UINT8 *sha1hash);
