@@ -398,7 +398,7 @@ EFI_STATUS start_image(EFI_HANDLE image_handle, CHAR16 *ImagePath)
 	 * Verify and, if appropriate, relocate and execute the executable
 	 */
 	efi_status = handle_image(data, datasize, shim_li, &entry_point,
-				  &alloc_address, &alloc_pages);
+				  &alloc_address, &alloc_pages, false);
 	if (EFI_ERROR(efi_status)) {
 		perror(L"Failed to load image: %r\n", efi_status);
 		PrintErrors();
