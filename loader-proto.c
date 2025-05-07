@@ -207,6 +207,20 @@ shim_load_image(BOOLEAN BootPolicy, EFI_HANDLE ParentImageHandle,
 	 * do anything more complicated.
 	 */
 	if (SourceSize && SourceBuffer) {
+		EFI_LOADED_IMAGE_PROTOCOL*li = NULL;
+
+		/*
+		 * UKIs using systemd-stub do not pass a parent handle with an attached loaded image protocol,
+		 * add it here so that we can match the cache entry without requiring UKI code changes
+		 */
+		efi_status = BS->HandleProtocol(ParentImageHandle, &gEfiLoadedImageProtocolGuid, (void **)&li);
+		if (EFI_ERROR(efi_status)) {
+			dprint(L"Could not get loaded image protocol, using provided handle as-is: %r\n", efi_status);
+		} else {
+			dprint(L"Loaded image protocol succeeded, using it instead of provided handle\n");
+			ParentImageHandle = li;
+		}
+
 		bprop.buffer = SourceBuffer;
 		bprop.size = SourceSize;
 		efi_status = try_load_from_cached_section(ParentImageHandle,
