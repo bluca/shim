@@ -185,10 +185,6 @@ out:
 }
 
 static EFI_STATUS EFIAPI
-shim_start_image(IN EFI_HANDLE ImageHandle, OUT UINTN *ExitDataSize,
-                 OUT CHAR16 **ExitData OPTIONAL);
-
-static EFI_STATUS EFIAPI
 shim_load_image(BOOLEAN BootPolicy, EFI_HANDLE ParentImageHandle,
                 EFI_DEVICE_PATH *DevicePath, VOID *SourceBuffer,
                 UINTN SourceSize, EFI_HANDLE *ImageHandle)
@@ -320,11 +316,6 @@ shim_load_image(BOOLEAN BootPolicy, EFI_HANDLE ParentImageHandle,
 
 	if (bprop.buffer && bprop.allocated_buffer)
 		FreePool(bprop.buffer);
-
-	if (systab->BootServices->LoadImage != shim_load_image &&
-	    systab->BootServices->StartImage == shim_start_image) {
-		systab->BootServices->LoadImage = shim_load_image;
-	}
 
 	return EFI_SUCCESS;
 
@@ -464,13 +455,11 @@ hook_system_services(EFI_SYSTEM_TABLE *local_systab)
 	/* We need to hook various calls to make this work... */
 
 	/*
-	 * We intentionally do not hook LoadImage() until we've seen a loader
-	 * use it, so that loaders that are unaware of our protocol won't use
-	 * it accidentally, which would break pre-loader-protocol UKIs.
-	 *
-	 * But we do save it here.
+	 * We need LoadImage() hooked so that we can guarantee everything is
+	 * verified.
 	 */
 	system_load_image = systab->BootServices->LoadImage;
+	systab->BootServices->LoadImage = shim_load_image;
 
 	/*
 	 * We need StartImage() hooked because the system's StartImage()
