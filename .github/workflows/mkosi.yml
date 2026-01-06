@@ -70,7 +70,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           submodules: recursive
-      - uses: systemd/mkosi@main
+      - uses: systemd/mkosi@d41ac276c963ac9fc9993c91f8711d4a99312cb4
 
       - name: Generate key
         run: mkosi genkey
